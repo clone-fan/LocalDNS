@@ -15,6 +15,7 @@ DNS 核心主要由折腾日记交流群的 R 大使用 Rust 编写；当前工�
 | `_src/ui/assets/js/console.js` | 布局、真实采样、草稿、语义与数字排版 |
 | `_src/ui/assets/js/material.js` | 外观参数与静态背景光影 |
 | `_src/ui/assets/js/navbar.js` | 顶部滚动联动 |
+| `_src/ui/assets/js/wallpaper.js` | 壁纸验证、IndexedDB 保存、旧数据迁移与失败反馈 |
 | `_src/ui/assets/css/overview.css` | 服务摘要与指标分组 |
 | `_src/ui/assets/css/typography.css` | 宋体标题与衬线数字 |
 | `_src/ui/assets/css/fonts.css` | 本地字体声明 |
@@ -46,6 +47,7 @@ python tools/package_ui.py
 - 顶部收拢与反向滚动；减少动态效果偏好。
 - 长数字显示、UI 包 CRC 与 SHA-256。
 - 更新脚本通过 Alpine `sh -n` 语法检查；打包时未执行升级脚本。
+- UI 2026.10.15.2 验证了 7 MB 壁纸刷新与重开浏览器后保留、在线地址回填、事务中止反馈、小容量回退和旧数据迁移；见 [验证记录](validation/wallpaper-2026.10.15.2.json)。
 
 本仓库没有构建或重新验证所有架构的 Rust 核心。预编译程序沿用 FJG20 发行文件。
 

@@ -6,9 +6,9 @@
 
 **DNS 核心主要由折腾日记交流群里的 R 大使用 Rust 编写；[yyhoworks](https://github.com/yyhoworks) 负责 UI 设计。**
 
-当前版本：**后端 FJG20 / UI 2026.10.15.1**。
+当前版本：**后端 FJG20 / UI 2026.10.15.2**。
 
-最新下载：**[UI 2026.10.15.1 Release](https://github.com/yyhoworks/LocalDNS/releases/tag/ui-v2026.10.15.1)**。
+最新下载：**[UI 2026.10.15.2 Release](https://github.com/yyhoworks/LocalDNS/releases/tag/ui-v2026.10.15.2)**。
 
 [安装说明](INSTALL.md) · [下载 Releases](https://github.com/yyhoworks/LocalDNS/releases) · [作者与分工](AUTHORS.md) · [开发说明](docs/DEVELOPMENT.md) · [近期更新](CHANGELOG.md)
 
@@ -43,11 +43,13 @@
 - **系统管理**：管理缓存、功能开关与运行数据。
 - **外观设置**：调整壁纸、模糊、透明度与背景暗化；支持深浅主题与手机布局。
 
+壁纸与外观保存在当前浏览器。较大的本地图片使用 IndexedDB 保存；面板会提示保存结果，在线图片地址在刷新后自动回填。
+
 查询趋势使用当前浏览器会话的真实采样，未附加服务器历史数据库。
 
 ## 快速安装
 
-1. 在 [Releases](https://github.com/yyhoworks/LocalDNS/releases/tag/ui-v2026.10.15.1) 下载完整包或 UI 升级包，并核对同页的 `SHA256SUMS.txt`。
+1. 在 [Releases](https://github.com/yyhoworks/LocalDNS/releases/tag/ui-v2026.10.15.2) 下载完整包或 UI 升级包，并核对同页的 `SHA256SUMS.txt`。
 2. 已有 LocalDNS 服务时，解压 UI 升级包并运行：
 
    ```sh

@@ -1,0 +1,20 @@
+{
+  "largeImageBytes": 7127786,
+  "largeImageSaved": true,
+  "survivesReload": true,
+  "survivesBrowserRestart": true,
+  "urlRestoredInInput": true,
+  "invalidImagePreservesPrevious": true,
+  "transactionAbortReported": true,
+  "localStorageFallbackRestored": true,
+  "resetPersisted": true,
+  "legacyMigrated": true,
+  "appearanceSettingsPreserved": true,
+  "mobileWidth": 390,
+  "errors": [],
+  "verifiedAt": "2026-10-15T21:44:43+08:00",
+  "validatedTargets": [
+    "isolated browser with read-only API proxy",
+    "deployed UI in isolated browser profile"
+  ]
+}

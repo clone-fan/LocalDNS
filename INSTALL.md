@@ -1,15 +1,15 @@
 # 安装与更新
 
-当前发行版本：**后端 FJG20 / UI 2026.10.15.1**。
+当前发行版本：**后端 FJG20 / UI 2026.10.15.2**。
 
 ## 选择下载包
 
-从 [UI 2026.10.15.1 Release](https://github.com/yyhoworks/LocalDNS/releases/tag/ui-v2026.10.15.1) 下载：
+从 [UI 2026.10.15.2 Release](https://github.com/yyhoworks/LocalDNS/releases/tag/ui-v2026.10.15.2) 下载：
 
 | 文件 | 用途 |
 |---|---|
-| `LocalDNS_FJG20_UI_2026.10.15.1_Full.zip` | 新安装：后端预编译程序、原始 FJG20 预设配置、规则和新 UI |
-| `LocalDNS_UI_2026.10.15.1_Update.zip` | 已安装环境更新界面 |
+| `LocalDNS_FJG20_UI_2026.10.15.2_Full.zip` | 新安装：后端预编译程序、原始 FJG20 预设配置、规则和新 UI |
+| `LocalDNS_UI_2026.10.15.2_Update.zip` | 已安装环境更新界面 |
 | `SHA256SUMS.txt` | 两个发行包的 SHA-256 校验值 |
 
 在同一目录核对：

@@ -316,44 +316,7 @@
         }
       });
 
-      const setPresetBackground = preset => {
-        wpLayer.style.backgroundImage = '';
-        wpLayer.dataset.preset = preset;
-        $$('[data-bg-preset]').forEach(b => b.classList.toggle('active', b.dataset.bgPreset === preset));
-        storage.set('localdns_bg_preset', preset);
-        try { localStorage.removeItem('localdns_bg_custom'); } catch {}
-      };
-      const setCustomImageBackground = dataUrl => {
-        wpLayer.dataset.preset = 'custom';
-        wpLayer.style.backgroundImage = `url("${dataUrl}")`;
-        $$('[data-bg-preset]').forEach(b => b.classList.remove('active'));
-        storage.set('localdns_bg_custom', dataUrl);
-      };
-
-      $$('[data-bg-preset]').forEach(btn => {
-        btn.onclick = () => setPresetBackground(btn.dataset.bgPreset);
-      });
-      if ($('#bg-file-input')) {
-        $('#bg-file-input').onchange = e => {
-          const file = e.target.files?.[0];
-          if (!file) return;
-          const reader = new FileReader();
-          reader.onload = () => { if (typeof reader.result === 'string') setCustomImageBackground(reader.result); };
-          reader.readAsDataURL(file);
-        };
-      }
-      if ($('#btn-apply-bg-url')) {
-        $('#btn-apply-bg-url').onclick = () => {
-          const u = ($('#bg-url-input')?.value || '').trim();
-          if (u) setCustomImageBackground(u);
-        };
-      }
-      if ($('#btn-clear-custom-bg')) {
-        $('#btn-clear-custom-bg').onclick = () => {
-          if ($('#bg-url-input')) $('#bg-url-input').value = '';
-          setPresetBackground('cosmos');
-        };
-      }
+      window.LocalDNSWallpaper?.setup({notify:toast});
       if ($('#slider-blur')) {
         $('#slider-blur').oninput = e => {
           const v = e.target.value;
@@ -375,10 +338,6 @@
           $('#val-dimmer').textContent = `${v}%`;
         };
       }
-      const savedCustom = storage.get('localdns_bg_custom');
-      const savedPreset = storage.get('localdns_bg_preset');
-      if (savedCustom) setCustomImageBackground(savedCustom);
-      else if (savedPreset) setPresetBackground(savedPreset);
     }
 
     // 3. 粒子开关与全局搜索

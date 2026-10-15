@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="assets/css/fonts.css?v=20261015-SERIF-01" />
   <link rel="stylesheet" href="assets/css/app.css?v=20261015-POLISHED-08" />
   <link rel="stylesheet" href="assets/css/console.css?v=20261015-TRANSLUCENT-08" />
-  <link rel="stylesheet" href="assets/css/material.css?v=20261015-TRANSLUCENT-08" />
+  <link rel="stylesheet" href="assets/css/material.css?v=20261015-UI-2" />
   <link rel="stylesheet" href="assets/css/navbar.css?v=20261015-FLOATING-01" />
   <link rel="stylesheet" href="assets/css/overview.css?v=20261015-SERIF-01" />
   <link rel="stylesheet" href="assets/css/typography.css?v=20261015-SERIF-01" />
@@ -76,7 +76,7 @@
             </div>
 
             <div class="bcp-row">
-              <span>2. 上传本地壁纸图片 (自动持久化保存)</span>
+              <span>2. 本地壁纸（选择后自动保存到当前浏览器）</span>
               <div style="display:flex;gap:8px">
                 <label class="glass-btn primary" style="flex:1;cursor:pointer">
                   选择本地图片...
@@ -93,6 +93,8 @@
                 <button type="button" class="glass-btn" id="btn-apply-bg-url">应用</button>
               </div>
             </div>
+
+            <p id="wallpaper-save-status" class="bcp-save-status" role="status" aria-live="polite">壁纸保存在当前浏览器，选择图片后自动保存。</p>
 
             <div class="bcp-row">
               <div class="bcp-row-head"><label for="slider-blur">毛玻璃模糊度</label><strong class="mono" id="val-blur">14px</strong></div>
@@ -159,7 +161,8 @@
   <script src="config.js?v=20261015-POLISHED-08"></script>
   <script src="assets/js/chart.umd.min.js"></script>
   <script src="assets/js/console.js?v=20261015-SERIF-01"></script>
-  <script src="assets/js/app.js?v=20261015-SERIF-01"></script>
+  <script src="assets/js/wallpaper.js?v=20261015-UI-2"></script>
+  <script src="assets/js/app.js?v=20261015-UI-2"></script>
   <script src="assets/js/material.js?v=20261015-TRANSLUCENT-08"></script>
   <script src="assets/js/navbar.js?v=20261015-FLOATING-01"></script>
 </body>
