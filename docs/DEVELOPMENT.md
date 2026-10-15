@@ -1,0 +1,51 @@
+# 开发说明
+
+## 源码范围
+
+本仓库提供当前 Web UI 的 HTML、CSS、JavaScript、Logo 和本地字体。
+DNS 核心主要由折腾日记交流群的 R 大使用 Rust 编写；当前工作目录没有提供核心 Rust 源码，发行版使用 FJG20 预编译程序。
+
+## 主要文件
+
+| 文件 | 作用 |
+|---|---|
+| `_src/ui/index.html` | 页面入口；静态资源基址为 `/ui/` |
+| `_src/ui/config.js` | UI 配置；默认通过同源地址访问 API |
+| `_src/ui/assets/js/app.js` | API 调用、路由与页面业务交互 |
+| `_src/ui/assets/js/console.js` | 布局、真实采样、草稿、语义与数字排版 |
+| `_src/ui/assets/js/material.js` | 外观参数与静态背景光影 |
+| `_src/ui/assets/js/navbar.js` | 顶部滚动联动 |
+| `_src/ui/assets/css/overview.css` | 服务摘要与指标分组 |
+| `_src/ui/assets/css/typography.css` | 宋体标题与衬线数字 |
+| `_src/ui/assets/css/fonts.css` | 本地字体声明 |
+
+## 调试
+
+UI 需要 LocalDNS 后端提供 `/api/`、`/plugins/`、`/metrics` 等现有接口。
+将 `_src/ui/` 的内容作为后端 `/ui/` 的静态文件使用。独立静态服务仅能查看结构，完整功能需要连接实际后端。
+
+不要在公开源码的 `config.js` 中写入设备凭据或个人服务器配置。
+
+## 打包
+
+```sh
+python tools/package_ui.py
+```
+
+脚本读取 `VERSION.json` 和 `_src/ui/`，生成 UI 升级包、逐文件校验清单和整包 SHA-256。
+输出位于 `dist/`，不会修改正在运行的服务器。
+
+新 UI 版本需要先更新 `VERSION.json`，再更新发布说明和资源查询版本，验证后发布。
+
+## 已核验范围
+
+- 桌面 1440px、手机 390px 的页面显示与横向溢出。
+- 五个页面、深浅主题、真实指标读取和服务摘要。
+- 浏览器确认标题与数字实际加载本地 Noto Serif SC 与 Instrument Serif。
+- 规则草稿、键盘和抽屉操作来自本轮现有验证。
+- 顶部收拢与反向滚动；减少动态效果偏好。
+- 长数字显示、UI 包 CRC 与 SHA-256。
+- 更新脚本通过 Alpine `sh -n` 语法检查；打包时未执行升级脚本。
+
+本仓库没有构建或重新验证所有架构的 Rust 核心。预编译程序沿用 FJG20 发行文件。
+
