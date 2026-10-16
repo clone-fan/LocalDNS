@@ -1,0 +1,7 @@
+/* HarmonyOS Sans SC - official TTF, self-hosted, unmodified.
+   Source: HarmonyOS-Sans.zip -> HarmonyOS_Sans_SC/, https://developer.huawei.com/images/download/general/HarmonyOS-Sans.zip.
+   License: HarmonyOS-Sans-LICENSE.txt (HarmonyOS Sans Fonts License Agreement). */
+@font-face{font-family:'HarmonyOS Sans SC';font-style:normal;font-weight:400;font-display:swap;src:url('../fonts/harmonyos-official/HarmonyOS_Sans_SC_Regular.ttf') format('truetype');}
+@font-face{font-family:'HarmonyOS Sans SC';font-style:normal;font-weight:500;font-display:swap;src:url('../fonts/harmonyos-official/HarmonyOS_Sans_SC_Medium.ttf') format('truetype');}
+@font-face{font-family:'HarmonyOS Sans SC';font-style:normal;font-weight:600;font-display:swap;src:url('../fonts/harmonyos-official/HarmonyOS_Sans_SC_Bold.ttf') format('truetype');}
+@font-face{font-family:'HarmonyOS Sans SC';font-style:normal;font-weight:700;font-display:swap;src:url('../fonts/harmonyos-official/HarmonyOS_Sans_SC_Bold.ttf') format('truetype');}

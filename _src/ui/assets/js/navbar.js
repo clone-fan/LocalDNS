@@ -2,7 +2,6 @@
   'use strict';
   const header = document.querySelector('.top-header-grid');
   if (!header) return;
-  const reduce = matchMedia('(prefers-reduced-motion: reduce)');
   let width = document.documentElement.clientWidth;
   let current = 0, target = 0, frame = 0, previousTime = 0;
   const clamp = value => Math.max(0, Math.min(1, value));
@@ -34,8 +33,8 @@
   function update() {
     const scroll = Math.max(0, window.scrollY);
     // Match the reference's continuous release from the top over the first 120px.
-    target = reduce.matches ? Number(scroll > 12) : clamp(scroll / 120);
-    if (reduce.matches || document.hidden) {
+    target = clamp(scroll / 120);
+    if (document.hidden) {
       cancelAnimationFrame(frame); frame = 0; previousTime = 0;
       current = target; paint();
     } else if (!frame && current !== target) frame = requestAnimationFrame(tick);

@@ -1,0 +1,7 @@
+/* MiSans (Xiaomi) - official woff2, self-hosted, unmodified.
+   Source: MiSans_Global_ALL.zip -> MiSans/woff2/, https://hyperos.mi.com/font-download/ (2023-08-22 build).
+   License: MiSans-LICENSE.pdf (MiSans Font Intellectual Property License Agreement). */
+@font-face{font-family:'MiSans';font-style:normal;font-weight:400;font-display:swap;src:url('../fonts/misans-official/MiSans-Regular.woff2') format('woff2');}
+@font-face{font-family:'MiSans';font-style:normal;font-weight:500;font-display:swap;src:url('../fonts/misans-official/MiSans-Medium.woff2') format('woff2');}
+@font-face{font-family:'MiSans';font-style:normal;font-weight:600;font-display:swap;src:url('../fonts/misans-official/MiSans-Demibold.woff2') format('woff2');}
+@font-face{font-family:'MiSans';font-style:normal;font-weight:700;font-display:swap;src:url('../fonts/misans-official/MiSans-Bold.woff2') format('woff2');}

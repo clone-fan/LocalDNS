@@ -1,5 +1,54 @@
 (() => {
   'use strict';
+  /* 外观参数统一持久化到 localStorage['localdns-material-v2']（壁纸/玻璃/圆角/字体/站点名称） */
+  let saved={};try{saved=JSON.parse(localStorage.getItem('localdns-material-v2')||'{}');}catch{}
+  const store=patch=>{saved={...saved,...patch};try{localStorage.setItem('localdns-material-v2',JSON.stringify(saved));}catch{};};
+
+  /* 版本标签：品牌区默认只显示名字，版本标签默认隐藏。
+     app.js 会在状态轮询里把后端版本写进 #brand-version-tag，所以这里用 html[data-brand-ver-mode] 标记模式。 */
+  const BRAND_VER_MODES=['hidden','version','custom'];
+  const BRAND_VER_LABELS={hidden:'隐藏',version:'跟随版本',custom:'自定义'};
+  const brandVerMode=()=>BRAND_VER_MODES.includes(saved.brandVer)?saved.brandVer:'hidden';
+  function applyBrand(){
+    const mode=brandVerMode();
+    const custom=(saved.brandVerText||'').trim();
+    document.documentElement.dataset.brandVerMode=mode;
+    const tag=document.querySelector('#brand-version-tag');
+    if(tag){
+      const visible=mode==='version'||(mode==='custom'&&!!custom);
+      tag.style.display=visible?'':'none';
+      if(mode==='custom')tag.textContent=custom;
+      else if(mode==='version'&&!tag.textContent.trim())tag.textContent='—';
+    }
+    const verVal=document.querySelector('#val-brand-ver');if(verVal)verVal.textContent=BRAND_VER_LABELS[mode];
+    const sel=document.querySelector('#select-brand-ver');if(sel&&sel.value!==mode)sel.value=mode;
+    const verInput=document.querySelector('#input-brand-ver');
+    if(verInput){verInput.hidden=mode!=='custom';if(verInput.value!==custom)verInput.value=custom;}
+  }
+  function initBrand(){
+    const verSel=document.querySelector('#select-brand-ver');
+    if(verSel)verSel.addEventListener('change',()=>{store({brandVer:verSel.value});applyBrand();});
+    const verInput=document.querySelector('#input-brand-ver');
+    if(verInput)verInput.addEventListener('input',()=>{store({brandVerText:verInput.value});applyBrand();});
+    applyBrand();
+  }
+
+  /* 外观面板「预设光影主题」右侧显示当前预设名（.wallpaper-layer[data-preset] 由 wallpaper.js 维护） */
+  function syncPresetLabel(){
+    const el=document.querySelector('#val-preset');if(!el)return;
+    const wall=document.querySelector('#wallpaper-layer');
+    const preset=wall&&wall.dataset.preset?wall.dataset.preset:'cosmos';
+    const btn=document.querySelector(`[data-bg-preset="${preset}"]`);
+    el.textContent=btn?String(btn.getAttribute('aria-label')||preset).replace(/\s*[（(].*$/,''):'自定义壁纸';
+  }
+  {
+    const wall=document.querySelector('#wallpaper-layer');
+    if(wall)new MutationObserver(syncPresetLabel).observe(wall,{attributes:true,attributeFilter:['data-preset']});
+    syncPresetLabel();
+  }
+
+  applyBrand(); // 解析阶段先落地版本标签状态，避免闪烁
+
   const init=()=>{
     const wall=document.querySelector('#wallpaper-layer');if(!wall)return;
     const canvas=document.createElement('canvas');canvas.id='ambient-orbit';canvas.setAttribute('aria-hidden','true');wall.append(canvas);
@@ -35,14 +84,68 @@
     }
     const schedule=()=>{if(!scheduled){scheduled=true;requestAnimationFrame(draw);}};
     window.addEventListener('resize',schedule,{passive:true});new MutationObserver(schedule).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});draw();
-    let saved={};try{saved=JSON.parse(localStorage.getItem('localdns-material-v2')||'{}');}catch{}
-    const defaults={blur:14,alpha:48,dimmer:22},units={blur:'px',alpha:'%',dimmer:'%'};
-    for(const name of ['blur','alpha','dimmer']){
+    function applyMaterial(name,value){
+      const root=document.documentElement.style;
+      if(name==='dimmer')root.setProperty('--bg-dimmer',(value/100).toFixed(2));
+      else if(name==='radius')root.setProperty('--radius-scale',(value/100).toFixed(2));
+      else root.setProperty('--glass-'+name,name==='blur'?value+'px':(value/100).toFixed(2));
+    }
+    const defaults={blur:14,alpha:48,dimmer:22,radius:100},units={blur:'px',alpha:'%',dimmer:'%',radius:'%'};
+    for(const name of ['blur','alpha','dimmer','radius']){
       const input=document.querySelector('#slider-'+name),label=document.querySelector('#val-'+name);if(!input)continue;
       const value=Math.min(+input.max,Math.max(+input.min,Number.isFinite(+saved[name])?+saved[name]:defaults[name]));input.value=value;
-      document.documentElement.style.setProperty(name==='dimmer'?'--bg-dimmer':'--glass-'+name,name==='blur'?value+'px':(value/100).toFixed(2));if(label)label.textContent=value+units[name];
-      input.addEventListener('input',()=>{const values=Object.fromEntries(['blur','alpha','dimmer'].map(k=>[k,+document.querySelector('#slider-'+k).value]));try{localStorage.setItem('localdns-material-v2',JSON.stringify(values));}catch{}});
+      applyMaterial(name,value);if(label)label.textContent=value+units[name];
+      input.addEventListener('input',()=>{const v=+input.value;applyMaterial(name,v);if(label)label.textContent=v+units[name];store({[name]:v});});
+    }
+    /* 字体族切换：MiSans（小米）与 HarmonyOS Sans（鸿蒙）为官方原始文件自托管（assets/fonts/misans-official、harmonyos-official），
+       Noto Serif SC（思源宋体）为 Fontsource 自托管；苹方（PingFang SC）为苹果系统字体，授权不允许再分发，只做本机优先、缺失时回退。
+       各档位均为“英文原名 + 中文名”，跟随系统语言不做中英切换。 */
+    const CJK_FALLBACK="'Noto Sans SC', 'Microsoft YaHei', system-ui, sans-serif";
+    const MISANS_STACK=`'MiSans', ${CJK_FALLBACK}`;
+    const HARMONY_STACK=`'HarmonyOS Sans SC', 'HarmonyOS Sans', ${CJK_FALLBACK}`;
+    const PINGFANG_STACK=`'PingFang SC', 'PingFang HK', '苹方-简', ${CJK_FALLBACK}`;
+    const SYSTEM_STACK="system-ui, -apple-system, 'Segoe UI', 'Microsoft YaHei', sans-serif";
+    const SERIF_STACK="'Noto Serif SC', 'Source Han Serif SC', 'Songti SC', 'SimSun', serif";
+    const uniform=s=>({sans:s,heading:s,numeral:s,mono:s});
+    const FONTS={
+      default:uniform(MISANS_STACK),
+      harmony:uniform(HARMONY_STACK),
+      pingfang:uniform(PINGFANG_STACK),
+      system:uniform(SYSTEM_STACK),
+      serif:uniform(SERIF_STACK)
+    },FONT_LABELS={default:'小米（MiSans）',harmony:'鸿蒙（HarmonyOS Sans）',pingfang:'苹方（PingFang SC）',system:'系统（System Default）',serif:'宋体（Source Han Serif）'};
+    function applyChartFont(family){
+      try{
+        if(!window.Chart||!Chart.defaults||!Chart.defaults.font)return;
+        Chart.defaults.font.family=family;
+        const getChart=typeof Chart.getChart==='function'?Chart.getChart:null;
+        if(!getChart)return;
+        document.querySelectorAll('canvas').forEach(canvas=>{
+          const instance=getChart(canvas);
+          if(!instance)return;
+          instance.options.font=Object.assign({},instance.options.font,{family});
+          instance.update('none');
+        });
+      }catch{}
+    }
+    const applyFont=key=>{
+      const set=FONTS[Object.prototype.hasOwnProperty.call(FONTS,key)?key:'default'],root=document.documentElement.style;
+      root.setProperty('--font-sans',set.sans);
+      root.setProperty('--font-heading',set.heading);
+      root.setProperty('--font-numeral',set.numeral);
+      root.setProperty('--font-mono',set.mono);
+      applyChartFont(set.sans);
+      const label=document.querySelector('#val-font');if(label)label.textContent=FONT_LABELS[key]||FONT_LABELS.default;
+    };
+    const fontSelect=document.querySelector('#select-font');
+    if(fontSelect){
+      const key=Object.prototype.hasOwnProperty.call(FONTS,saved.font)?saved.font:'default';
+      fontSelect.value=key;applyFont(key);
+      fontSelect.addEventListener('change',()=>{applyFont(fontSelect.value);store({font:fontSelect.value});});
     }
   };
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
+  // initBrand 需在 app.js 初始化之后再落地一次（app.js 会在 init 里写 document.title 与侧栏状态行）
+  const initAll=()=>{initBrand();syncPresetLabel();};
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',init,{once:true});document.addEventListener('DOMContentLoaded',initAll,{once:true});}
+  else{init();initAll();}
 })();
