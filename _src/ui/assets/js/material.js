@@ -128,21 +128,153 @@
         });
       }catch{}
     }
+    /* ---- 自定义字体上传 ----
+       用户自行上传的字体文件只保存在本机浏览器（IndexedDB 的 localdns-appearance/settings.fonts，
+       与壁纸同一数据库），刷新后自动重新注册；上传后加入「界面字体」下拉，可随时移除。 */
+    const uploadedFonts=[];       // {id,name,family,size,data}
+    const uploadedFaces=new Map();// id -> FontFace
+    const uploadedFont=key=>uploadedFonts.find(f=>f.id===key);
+    const fontStackFor=key=>{
+      if(Object.prototype.hasOwnProperty.call(FONTS,key))return FONTS[key];
+      const up=uploadedFont(key);
+      if(up)return uniform("'" + String(up.family).replace(/['"]/g,'') + "', " + CJK_FALLBACK);
+      return FONTS.default;
+    };
+    const fontLabelFor=key=>{
+      if(FONT_LABELS[key])return FONT_LABELS[key];
+      const up=uploadedFont(key);
+      return up?up.name:FONT_LABELS.default;
+    };
     const applyFont=key=>{
-      const set=FONTS[Object.prototype.hasOwnProperty.call(FONTS,key)?key:'default'],root=document.documentElement.style;
+      const set=fontStackFor(key),root=document.documentElement.style;
       root.setProperty('--font-sans',set.sans);
       root.setProperty('--font-heading',set.heading);
       root.setProperty('--font-numeral',set.numeral);
       root.setProperty('--font-mono',set.mono);
       applyChartFont(set.sans);
-      const label=document.querySelector('#val-font');if(label)label.textContent=FONT_LABELS[key]||FONT_LABELS.default;
+      const label=document.querySelector('#val-font');if(label)label.textContent=fontLabelFor(key);
     };
     const fontSelect=document.querySelector('#select-font');
     if(fontSelect){
-      const key=Object.prototype.hasOwnProperty.call(FONTS,saved.font)?saved.font:'default';
+      const key=Object.prototype.hasOwnProperty.call(FONTS,saved.font)?saved.font:(uploadedFont(saved.font)?saved.font:'default');
       fontSelect.value=key;applyFont(key);
       fontSelect.addEventListener('change',()=>{applyFont(fontSelect.value);store({font:fontSelect.value});});
     }
+
+    const fontInput=document.querySelector('#input-font-upload');
+    const fontListEl=document.querySelector('#font-upload-list');
+    const fontValEl=document.querySelector('#val-font-upload');
+    const setFontHint=text=>{if(fontValEl)fontValEl.textContent=text;};
+    const fontStore=(mode,value)=>new Promise((resolve,reject)=>{
+      let settled=false;
+      const request=indexedDB.open('localdns-appearance',1);
+      const timer=setTimeout(()=>{settled=true;reject(new Error('浏览器存储暂时不可用'));},8000);
+      request.onupgradeneeded=()=>{if(!request.result.objectStoreNames.contains('settings'))request.result.createObjectStore('settings');};
+      request.onerror=()=>{clearTimeout(timer);settled=true;reject(request.error);};
+      request.onblocked=()=>{clearTimeout(timer);settled=true;reject(new Error('浏览器存储被其他标签页占用'));};
+      request.onsuccess=()=>{
+        const db=request.result;if(settled){db.close();return;}clearTimeout(timer);
+        let result,tx;
+        try{
+          tx=db.transaction('settings',mode);
+          const store=tx.objectStore('settings');
+          const op=mode==='readonly'?store.get('fonts'):store.put(value,'fonts');
+          op.onsuccess=()=>{result=op.result;};
+        }catch(error){db.close();reject(error);return;}
+        tx.oncomplete=()=>{db.close();resolve(result);};
+        tx.onabort=()=>{db.close();reject(tx.error||new Error('浏览器未能保存字体'));};
+        tx.onerror=()=>{};
+      };
+    });
+    const persistFonts=()=>fontStore('readwrite',uploadedFonts.map(f=>({id:f.id,name:f.name,family:f.family,size:f.size,data:f.data})));
+    function syncFontOptions(){
+      if(!fontSelect)return;
+      let group=fontSelect.querySelector('optgroup[data-upfont]');
+      if(!uploadedFonts.length){if(group)group.remove();return;}
+      if(!group){group=document.createElement('optgroup');group.label='已上传字体';group.setAttribute('data-upfont','');fontSelect.appendChild(group);}
+      group.textContent='';
+      uploadedFonts.forEach(f=>{const opt=document.createElement('option');opt.value=f.id;opt.textContent=f.name;group.appendChild(opt);});
+    }
+    function renderFontList(){
+      if(!fontListEl)return;
+      fontListEl.textContent='';
+      fontListEl.hidden=!uploadedFonts.length;
+      uploadedFonts.forEach(f=>{
+        const item=document.createElement('div');item.className='bcp-font-item';
+        const nameEl=document.createElement('span');nameEl.className='bcp-font-name';nameEl.textContent=f.name;nameEl.title=f.name;
+        const sizeEl=document.createElement('span');sizeEl.className='bcp-font-size';sizeEl.textContent=f.size>=1048576?(f.size/1048576).toFixed(1)+' MB':Math.max(1,Math.round(f.size/1024))+' KB';
+        const del=document.createElement('button');del.type='button';del.className='bcp-font-del';del.textContent='移除';del.setAttribute('aria-label','移除 '+f.name);
+        del.addEventListener('click',()=>removeFont(f.id));
+        item.append(nameEl,sizeEl,del);fontListEl.appendChild(item);
+      });
+      setFontHint(uploadedFonts.length?uploadedFonts.length+' 个字体':'未上传');
+    }
+    async function addFontFile(file){
+      if(file.size>64*1048576)throw new Error('超过 64 MB 限制');
+      const buf=await file.arrayBuffer();
+      const base=file.name.replace(/\.(ttf|otf|woff2?|ttc)$/i,'')||file.name;
+      let family=base,n=2;
+      while(uploadedFonts.some(f=>f.family===family))family=base+' ('+(n++)+')';
+      const face=new FontFace(family,buf);
+      await face.load();
+      const id='up'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+      document.fonts.add(face);
+      uploadedFonts.push({id,name:file.name,family,size:file.size,data:buf});
+      uploadedFaces.set(id,face);
+    }
+    async function removeFont(id){
+      const idx=uploadedFonts.findIndex(f=>f.id===id);if(idx<0)return;
+      uploadedFonts.splice(idx,1);
+      const face=uploadedFaces.get(id);if(face){try{document.fonts.delete(face);}catch{}uploadedFaces.delete(id);}
+      if(fontSelect&&fontSelect.value===id){fontSelect.value='default';applyFont('default');store({font:'default'});}
+      syncFontOptions();renderFontList();
+      try{await persistFonts();}catch{}
+    }
+    async function handleFontFiles(files){
+      const okNames=[],failNames=[];
+      for(const file of files){
+        try{await addFontFile(file);okNames.push(file.name);}
+        catch(error){failNames.push(file.name);}
+      }
+      syncFontOptions();renderFontList();
+      if(okNames.length){
+        try{await persistFonts();}
+        catch{setFontHint('字体未能保存（浏览器存储空间不足或受限）');return;}
+      }
+      if(failNames.length)setFontHint('无法解析：'+failNames.join('、'));
+    }
+    if(fontInput){
+      fontInput.addEventListener('change',()=>{
+        const files=[...(fontInput.files||[])];fontInput.value='';
+        if(files.length)handleFontFiles(files);
+      });
+    }
+    {
+      const uploadBtn=document.querySelector('#btn-font-upload');
+      if(uploadBtn&&fontInput)uploadBtn.addEventListener('click',()=>fontInput.click());
+    }
+    (async()=>{
+      let list=null;
+      try{list=await fontStore('readonly');}catch{}
+      if(Array.isArray(list)){
+        for(const rec of list){
+          if(!rec||!rec.id||!rec.data)continue;
+          try{
+            const face=new FontFace(rec.family,rec.data);
+            await face.load();document.fonts.add(face);
+            uploadedFonts.push({id:rec.id,name:rec.name||rec.family,family:rec.family,size:rec.size||rec.data.byteLength||0,data:rec.data});
+            uploadedFaces.set(rec.id,face);
+          }catch{}
+        }
+      }
+      syncFontOptions();renderFontList();
+      const want=Object.prototype.hasOwnProperty.call(FONTS,saved.font)?saved.font:(uploadedFont(saved.font)?saved.font:'default');
+      if(fontSelect){
+        const exists=[...fontSelect.options].some(o=>o.value===want);
+        fontSelect.value=exists?want:'default';
+        applyFont(fontSelect.value);
+      }
+    })();
   };
   // initBrand 需在 app.js 初始化之后再落地一次（app.js 会在 init 里写 document.title 与侧栏状态行）
   const initAll=()=>{initBrand();syncPresetLabel();};

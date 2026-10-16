@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="assets/css/navbar.css?v=20261016-RADIUS-FONT-01" />
   <link rel="stylesheet" href="assets/css/overview.css?v=20261016-RADIUS-FONT-01" />
   <link rel="stylesheet" href="assets/css/typography.css?v=20261016-RADIUS-FONT-01" />
-  <link rel="stylesheet" href="assets/css/polish.css?v=20261016-POLISH-22" />
+  <link rel="stylesheet" href="assets/css/polish.css?v=20261016-POLISH-23" />
 </head>
 <body>
 
@@ -143,6 +143,16 @@
               </div>
 
               <div class="bcp-row">
+                <div class="bcp-row-head"><label>自定义字体（可选）</label><strong class="mono" id="val-font-upload">未上传</strong></div>
+                <div class="bcp-inline">
+                  <button type="button" class="glass-btn" id="btn-font-upload">上传字体文件…</button>
+                  <input type="file" id="input-font-upload" accept=".ttf,.otf,.woff,.woff2" multiple hidden />
+                </div>
+                <div class="bcp-font-list" id="font-upload-list" hidden></div>
+              </div>
+
+
+              <div class="bcp-row">
                 <div class="bcp-row-head"><label for="select-brand-ver">版本标签</label><strong class="mono" id="val-brand-ver">隐藏</strong></div>
                 <select class="bcp-input bcp-select" id="select-brand-ver" aria-label="版本标签">
                   <option value="hidden">隐藏（推荐）</option>
@@ -205,7 +215,7 @@
   <script src="assets/js/console.js?v=20261015-SERIF-01"></script>
   <script src="assets/js/wallpaper.js?v=20261015-UI-2"></script>
   <script src="assets/js/app.js?v=20261016-TOPO-03"></script>
-  <script src="assets/js/material.js?v=20261016-BRAND-06"></script>
+  <script src="assets/js/material.js?v=20261016-FONTUP-01"></script>
   <script src="assets/js/navbar.js?v=20261016-TOPO-02"></script>
 </body>
 </html>
